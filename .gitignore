@@ -1,0 +1,5 @@
+*.pdf
+*.md
+.DS_Store
+/lec
+/course_info

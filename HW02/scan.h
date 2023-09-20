@@ -2,6 +2,6 @@
 #define MY_LIBRARY_H
 
 // Function declaration
-float* scan(const float* arr, const char operation);
+void scan(float* arr, const int arr_size, const char operation);
 
 #endif 

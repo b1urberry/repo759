@@ -1,7 +1,11 @@
-#ifndef MY_LIBRARY_H
-#define MY_LIBRARY_H
+#ifndef SCAN_H
+#define SCAN_H
 
-// Function declaration
-void scan(float* arr, const int arr_size, const char operation);
+#include <cstddef>
 
-#endif 
+// Performs an inclusive scan on input array arr and stores
+// the result in the output array
+// arr and output are arrays of n elements
+void scan(const float *arr, float *output, std::size_t n);
+
+#endif

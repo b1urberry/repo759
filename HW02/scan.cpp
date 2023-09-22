@@ -1,19 +1,16 @@
 #include "scan.h"
+#include <cstring>
 #include <iostream>
+#include <cstdlib>
 
 // Function definition
-void scan(float* arr, const int arr_size, const char operation) {
+void scan(const float *arr, float *output, std::size_t n) {
 
-    if (operation == '+') {
-        for (int i = 1; i < arr_size; i++) {
-            arr[i] += arr[i-1];
-        }
+    std::memcpy(output, arr, n*sizeof(float)); 
+
+    for (int i = 1; i < n; i++) {
+            output[i] += output[i-1];
     }
-    else if (operation == '*') {
-        for (int i = 1; i < arr_size; i++) {
-            arr[i] *= arr[i-1];
-        }
-    }
-    
+
     return;
 }

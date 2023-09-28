@@ -1,8 +1,13 @@
 *.pdf
 *.md
-.DS_Store
+*.h
+*.png
+
 /lec
 /course_info
-*.h
+/writeup
+
 Makefile
+.DS_Store
+
 plot_task1.py

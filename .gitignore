@@ -2,6 +2,8 @@
 *.md
 *.h
 *.png
+*.cuh
+*.sh
 
 /lec
 /course_info

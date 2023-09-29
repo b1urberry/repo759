@@ -17,27 +17,24 @@ __global__ void computeArray(int *dA, int a) {
 }
 
 int main() {
-    int hA[ARRAY_SIZE]; 
+    int host_array[ARRAY_SIZE]; 
     int *dA;
-    int a;
 
     // Generate a random integer for 'a'
     a = rand() % 10; // Generate a random number between 0 and 9 for simplicity.
 
-    printf("Randomly generated a: %d\n", a);
-
-    // Allocate memory on the GPU.
+    // allocate an array of 16 ints on the device called dA from the host
     cudaMalloc(&dA, ARRAY_SIZE * sizeof(int));
 
     // Launch the kernel with 2 blocks and 8 threads per block.
     computeArray<<<2, BLOCK_SIZE>>>(dA, a);
 
     // Copy results from device to host.
-    cudaMemcpy(hA, dA, ARRAY_SIZE * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(host_array, dA, ARRAY_SIZE * sizeof(int), cudaMemcpyDeviceToHost);
 
     // Print the results.
     for (int i = 0; i < ARRAY_SIZE; i++) {
-        printf("%d ", hA[i]);
+        printf("%d ", host_array[i]);
     }
     printf("\n");
 

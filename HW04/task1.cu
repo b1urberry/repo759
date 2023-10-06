@@ -63,7 +63,9 @@ int main(int argc, char* argv[])
     float milliseconds = 0;
     cudaEventElapsedTime(&milliseconds, start, stop);
 
-    printf("%d %.2f %.2f\n", n, C[n * n - 1], milliseconds);
+    printf("%.2f\n", C[n * n - 1]);
+    printf("%.2f\n", milliseconds);
+    
 
     delete[] A;
     delete[] B;

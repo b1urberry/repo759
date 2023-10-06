@@ -71,7 +71,8 @@ int main(int argc, char** argv) {
     cudaMemcpy(h_output, d_output, n * sizeof(float), cudaMemcpyDeviceToHost);
 
     // Print the last element and the execution time
-    std::cout << n << " " << h_output[n - 1] << " " << milliseconds << std::endl;
+    printf("%.2f\n", h_output[n - 1]);
+    printf("%.2f\n", milliseconds);
 
     // Clean up
     delete[] h_image;

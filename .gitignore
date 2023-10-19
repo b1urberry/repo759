@@ -4,6 +4,9 @@
 *.png
 *.cuh
 *.sh
+*.err
+*.out
+*.txt
 
 /lec
 /course_info

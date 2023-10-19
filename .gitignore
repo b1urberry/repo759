@@ -11,6 +11,7 @@
 /lec
 /course_info
 /writeup
+/helper
 
 Makefile
 .DS_Store

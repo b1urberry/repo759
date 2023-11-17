@@ -7,6 +7,7 @@
 *.err
 *.out
 *.txt
+/HW09/convolve.cpp
 
 /lec
 /course_info

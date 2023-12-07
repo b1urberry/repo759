@@ -1,0 +1,1 @@
+int hash(int *input, int *output, int bitlen);

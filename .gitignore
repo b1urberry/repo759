@@ -1,6 +1,14 @@
 *.pdf
 *.md
-*.h
+/HW01/*.h
+/HW02/*.h
+/HW03/*.h
+/HW04/*.h
+/HW05/*.h
+/HW06/*.h
+/HW07/*.h
+/HW08/*.h
+/HW09/*.h
 *.png
 *.cuh
 *.sh

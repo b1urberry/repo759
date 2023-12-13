@@ -102,17 +102,18 @@ void setDifficulty(uint32_t bits, uint32_t *difficulty)
     }
 }
 
-void hashBlock(uint32_t nonce, char *version, char *prev_block_hash, char *merkle_root, char *time, char *bits, uint32_t *result)
-{
-    BYTE *blockHeader = malloc(80 * sizeof(BYTE));
-
+void prepare_blockHeader(BYTE *blockHeader, char *version, char *prev_block_hash, char *merkle_root, char *time, char *bits){
     hexStringToByteArray(version, blockHeader);
     hexStringToByteArray(prev_block_hash, blockHeader + 4);
     hexStringToByteArray(merkle_root, blockHeader + 36);
     hexStringToByteArray(time, blockHeader + 68);
     hexStringToByteArray(bits, blockHeader + 72);
-    uint32_to_little_endian(nonce, blockHeader + 76);
+    
+}
 
+void hashBlock(uint32_t nonce, BYTE* blockHeader, uint32_t *result)
+{
+    uint32_to_little_endian(nonce, blockHeader + 76);
     // print_bytes((unsigned char *)blockHeader, 80, 1);
 
     // hash the block header
@@ -135,6 +136,9 @@ void hashBlock(uint32_t nonce, char *version, char *prev_block_hash, char *merkl
 
 uint32_t mineBlock(uint32_t noncestart, char *version, char *prev_block_hash, char *merkle_root, char *time, char *nbits)
 {
+    BYTE *blockHeader = malloc(80 * sizeof(BYTE));
+    prepare_blockHeader(blockHeader, version, prev_block_hash, merkle_root, time, nbits)
+
     // First convert bits to a uint32_t, then convert this to a difficulty
     uint32_t difficulty[8];
     uint32_t bits[1];

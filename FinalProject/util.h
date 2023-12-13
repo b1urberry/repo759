@@ -4,11 +4,13 @@
 #include <stdint.h>
 #include "sha256.h"
 
-// convert a hex string to a byte array
-void hexStringToByteArray(char *hexString, BYTE *byteArray);
+void hexStringToByteArray(const char* hexstr, unsigned char *output);
 
-// convert a hex string to an int array
-void hexStringToIntArray(char *hexString, uint32_t *intArray);
+void hexStringToIntArray(const char *hexstr, uint32_t *outputloc);
+
+void hexstr_to_intarray(const char* hexstr, uint32_t* outputloc);
+
+unsigned char* hexstr_to_char(const char* hexstr);
 
 uint32_t reverse32(uint32_t value);
 

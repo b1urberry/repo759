@@ -1,6 +1,7 @@
 /*********************************************************************
 * Filename:   sha256.c
 * Author:     Brad Conte (brad AT bradconte.com)
+* Modified by: Jiayi Liu
 * Copyright:
 * Disclaimer: This code is presented "as is" without any guarantees.
 * Details:    Performs known-answer tests on the corresponding SHA1
@@ -15,14 +16,18 @@
 #include <stdio.h>
 #include <memory.h>
 #include <string.h>
+#include <stdlib.h>
 #include "sha256.h"
 
-/*********************** FUNCTION DEFINITIONS ***********************/
+// this function test the sha256 implementation using some pre-defined binary strings
+// the sha256 hashes of these binary strings are known and compared to the ouput our algorithm
 int sha256_test()
 {
 	BYTE text1[] = {"abc"};
 	BYTE text2[] = {"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"};
 	BYTE text3[] = {"aaaaaaaaaa"};
+
+	// answer keys: sha256 hashes for the above binary strings 
 	BYTE hash1[SHA256_BLOCK_SIZE] = {0xba,0x78,0x16,0xbf,0x8f,0x01,0xcf,0xea,0x41,0x41,0x40,0xde,0x5d,0xae,0x22,0x23,
 	                                 0xb0,0x03,0x61,0xa3,0x96,0x17,0x7a,0x9c,0xb4,0x10,0xff,0x61,0xf2,0x00,0x15,0xad};
 	BYTE hash2[SHA256_BLOCK_SIZE] = {0x24,0x8d,0x6a,0x61,0xd2,0x06,0x38,0xb8,0xe5,0xc0,0x26,0x93,0x0c,0x3e,0x60,0x39,
@@ -53,9 +58,37 @@ int sha256_test()
 	return(pass);
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-	printf("SHA-256 tests: %s\n", sha256_test() ? "SUCCEEDED" : "FAILED");
+	// if using the sha256_test function
+	if (argc == 1) {
+        printf("SHA-256 tests: %s\n", sha256_test() ? "SUCCEEDED" : "FAILED");
+        return 0;
+    }
 
-	return(0);
+	// if testing with a custom binary string
+	if (argc != 2) {
+		printf("Usage: %s <string>\n", argv[0]);
+		return 1;
+	}
+
+    int len = strlen(argv[1]);
+
+    BYTE *text = malloc(len * sizeof(BYTE));
+    memcpy(text, argv[1], len);
+    BYTE buf[SHA256_BLOCK_SIZE];
+    
+    SHA256_CTX ctx;
+
+    sha256_init(&ctx);
+    sha256_update(&ctx, text, len);
+    sha256_final(&ctx, buf);
+
+    // print out the hash 
+    for (int i = 0; i < SHA256_BLOCK_SIZE; i++)
+        printf("%02x", buf[i]);
+
+	free(text);
+
+	return 0;
 }

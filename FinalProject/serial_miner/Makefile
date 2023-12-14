@@ -36,5 +36,5 @@ serial:
 # 	$(NVCC) main.cu kernel.cu -o main $(NVCC_FLAGS)
 
 clean:
-	rm -f *.o *.out *.err main serial
+	rm -rf *.o *.out *.err *.dSYM main serial serial 
 

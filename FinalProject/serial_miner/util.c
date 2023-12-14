@@ -3,11 +3,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 
 #include "sha256.h"
 #include "util.h"
 
+// convert a hex string to a byte array
 void hexStringToByteArray(const char *hexstr, unsigned char *output) {
     while (*hexstr && hexstr[1]) {
         sscanf(hexstr, "%2hhx", output++);
@@ -15,6 +17,7 @@ void hexStringToByteArray(const char *hexstr, unsigned char *output) {
     }
 }
 
+// convert a hex string to a unsigned chars
 unsigned char* hexstr_to_char(const char* hexstr)
 {
     size_t len = strlen(hexstr);
@@ -26,6 +29,7 @@ unsigned char* hexstr_to_char(const char* hexstr)
     return chars;
 }
 
+// convert a hex string to a uint32_t array
 void hexstr_to_intarray(const char* hexstr, uint32_t* outputloc)
 {
     size_t len = strlen(hexstr);
@@ -42,6 +46,7 @@ void hexstr_to_intarray(const char* hexstr, uint32_t* outputloc)
     }
 }
 
+// reverse big and little endian
 uint32_t reverse32(uint32_t value)
 {
     return (((value & 0x000000FF) << 24) |
@@ -50,6 +55,7 @@ uint32_t reverse32(uint32_t value)
             ((value & 0xFF000000) >> 24));
 }
 
+// convert a uint32_t to a little endian byte array
 void uint32_to_little_endian(uint32_t value, unsigned char *buffer) {
     buffer[0] = value & 0xFF;         // Extracts the least significant byte
     buffer[1] = (value >> 8) & 0xFF;
@@ -57,7 +63,7 @@ void uint32_to_little_endian(uint32_t value, unsigned char *buffer) {
     buffer[3] = (value >> 24) & 0xFF; // Extracts the most significant byte
 }
 
-
+// print out a byte array, with every byte separated by a space
 void print_bytes(const unsigned char *data, size_t dataLen, int format) 
 {
     for(size_t i = 0; i < dataLen; ++i) {
@@ -69,6 +75,7 @@ void print_bytes(const unsigned char *data, size_t dataLen, int format)
     printf("\n");
 }
 
+// print out a byte array in reverse order, with every byte separated by a space
 void print_bytes_reversed(const unsigned char *data, size_t dataLen, int format) 
 {
     for(size_t i = dataLen; i > 0; --i) {
@@ -80,7 +87,7 @@ void print_bytes_reversed(const unsigned char *data, size_t dataLen, int format)
     printf("\n");
 }
 
-
+// sets the difficulty of a block based on the bits specified in the block header
 void setDifficulty(uint32_t bits, uint32_t *difficulty) 
 {
     for(int i = 0; i < 8; i++)
@@ -102,6 +109,7 @@ void setDifficulty(uint32_t bits, uint32_t *difficulty)
     }
 }
 
+// converts the hexidecimal strings in the block header to a byte array, without the nonce
 void prepare_blockHeader(BYTE *blockHeader, char *version, char *prev_block_hash, char *merkle_root, char *time, char *bits){
     hexStringToByteArray(version, blockHeader);
     hexStringToByteArray(prev_block_hash, blockHeader + 4);
@@ -111,15 +119,17 @@ void prepare_blockHeader(BYTE *blockHeader, char *version, char *prev_block_hash
     
 }
 
+// hashes the block header with the given nonce, and stores the result in result
 void hashBlock(uint32_t nonce, BYTE* blockHeader, uint32_t *result)
 {
     uint32_to_little_endian(nonce, blockHeader + 76);
     // print_bytes((unsigned char *)blockHeader, 80, 1);
 
-    // hash the block header
+    
     BYTE buf[SHA256_BLOCK_SIZE];
     SHA256_CTX ctx;
 
+    // hash the block header
     sha256_init(&ctx);
     sha256_update(&ctx, blockHeader, 80);
     sha256_final(&ctx, buf);
@@ -132,6 +142,9 @@ void hashBlock(uint32_t nonce, BYTE* blockHeader, uint32_t *result)
     memcpy(result, buf, 32);
 }
 
+// continuously hashes the block header with increasing nonces 
+// until one of the 32-bit integers in the hash is less than the corresponding integer in the difficulty
+// returns the nonce that satisfies this condition
 uint32_t mineBlock(uint32_t noncestart, char *version, char *prev_block_hash, char *merkle_root, char *time, char *nbits)
 {
     BYTE *blockHeader = malloc(80 * sizeof(BYTE));
@@ -147,6 +160,8 @@ uint32_t mineBlock(uint32_t noncestart, char *version, char *prev_block_hash, ch
     uint32_t hash[8];
     uint32_t nonce = noncestart-1;
 
+    clock_t start = clock();
+
     while(1)
     {
         nonce++;
@@ -154,7 +169,7 @@ uint32_t mineBlock(uint32_t noncestart, char *version, char *prev_block_hash, ch
         hashBlock(nonce, blockHeader, hash);
 
         // print out the hash with the current nonce, for testing
-        print_bytes_reversed((unsigned char *)hash, 32, 1);
+        // print_bytes_reversed((unsigned char *)hash, 32, 1);
 
         for(int i = 0; i < 8; i++)
         {
@@ -167,6 +182,18 @@ uint32_t mineBlock(uint32_t noncestart, char *version, char *prev_block_hash, ch
             else if(hash[7-i] > difficulty[i])
                 break;
             // And if they're equal, we keep going!
+        }
+
+        if(((nonce - noncestart) % 500000) == 0 && nonce != noncestart) 
+        {
+            clock_t end = clock();
+            double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+
+            double hashrate = 500000 / time_spent; // hashes per second
+
+            printf("%f hashes per second\n", hashrate);
+
+            start = clock();
         }
     }
     

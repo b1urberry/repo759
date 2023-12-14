@@ -154,7 +154,7 @@ uint32_t mineBlock(uint32_t noncestart, char *version, char *prev_block_hash, ch
         hashBlock(nonce, blockHeader, hash);
 
         // print out the hash with the current nonce, for testing
-        // print_bytes_reversed((unsigned char *)hash, 32, 1);
+        print_bytes_reversed((unsigned char *)hash, 32, 1);
 
         for(int i = 0; i < 8; i++)
         {

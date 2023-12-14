@@ -21,7 +21,6 @@
 /writeup
 /helpers
 
-Makefile
 .DS_Store
 
 plot_task1.py

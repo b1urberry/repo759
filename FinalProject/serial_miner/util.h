@@ -23,9 +23,10 @@ void print_bytes_reversed(const unsigned char *data, size_t dataLen, int format)
 // set the difficulty
 void setDifficulty(uint32_t bits, uint32_t *difficulty);
 
+void prepare_blockHeader(BYTE *blockHeader, char *version, char *prev_block_hash, char *merkle_root, char *time, char *bits);
+
 // hash a block 
-void hashBlock(uint32_t nonce, char *version, char *prev_block_hash, 
-    char *merkle_root, char *time, char *bits, uint32_t *result);
+void hashBlock(uint32_t nonce, BYTE *blockHeader, uint32_t *result);
 
 // mine a block
 uint32_t mineBlock(uint32_t noncestart, char *version, 

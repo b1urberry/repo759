@@ -10,7 +10,6 @@
 /HW08/*.h
 /HW09/*.h
 *.png
-*.cuh
 *.sh
 *.err
 *.out

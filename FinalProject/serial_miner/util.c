@@ -34,7 +34,7 @@ void hexstr_to_intarray(const char* hexstr, uint32_t* outputloc)
 
     for(size_t i = 0; i < intlen; i++)
     {
-        uint32_t a = (uint32_t)bytes[i * 4 + 3] << 24;
+        // uint32_t a = (uint32_t)bytes[i * 4 + 3] << 24;
         *(outputloc + i) = ((uint32_t)bytes[i * 4])
             + ((uint32_t)bytes[i * 4 + 1] << 8)
             + ((uint32_t)bytes[i * 4 + 2] << 16)
@@ -130,14 +130,12 @@ void hashBlock(uint32_t nonce, BYTE* blockHeader, uint32_t *result)
     sha256_final(&ctx, buf);
 
     memcpy(result, buf, 32);
-
-    free(blockHeader);
 }
 
 uint32_t mineBlock(uint32_t noncestart, char *version, char *prev_block_hash, char *merkle_root, char *time, char *nbits)
 {
     BYTE *blockHeader = malloc(80 * sizeof(BYTE));
-    prepare_blockHeader(blockHeader, version, prev_block_hash, merkle_root, time, nbits)
+    prepare_blockHeader(blockHeader, version, prev_block_hash, merkle_root, time, nbits);
 
     // First convert bits to a uint32_t, then convert this to a difficulty
     uint32_t difficulty[8];
@@ -153,7 +151,7 @@ uint32_t mineBlock(uint32_t noncestart, char *version, char *prev_block_hash, ch
     {
         nonce++;
 
-        hashBlock(nonce, version, prev_block_hash, merkle_root, time, nbits, hash);
+        hashBlock(nonce, blockHeader, hash);
 
         // print out the hash with the current nonce, for testing
         // print_bytes_reversed((unsigned char *)hash, 32, 1);
@@ -163,6 +161,7 @@ uint32_t mineBlock(uint32_t noncestart, char *version, char *prev_block_hash, ch
             if(hash[7-i] < difficulty[i])
             {
                 solved = 1;
+                free(blockHeader);
                 return nonce;
             }
             else if(hash[7-i] > difficulty[i])
@@ -170,5 +169,6 @@ uint32_t mineBlock(uint32_t noncestart, char *version, char *prev_block_hash, ch
             // And if they're equal, we keep going!
         }
     }
-
+    
+    free(blockHeader);
 }

@@ -56,7 +56,7 @@ __managed__ uint32_t difficulty[8];
 // miner kernel call: each thread verifies one nonce
 __global__ void mine_kernel(uint32_t nonceStart, BYTE *blockHeader);
 // make kernel call
-void launch_mine(int threads_per_block, uint32_t nonceStart, BYTE *blockHeader);
+// void launch_mine(int threads_per_block, uint32_t nonceStart, BYTE *blockHeader);
 
 // utility functions
 __device__ void uint32_to_little_endian(uint32_t value, unsigned char *buffer);
@@ -85,9 +85,6 @@ int main(){
     const char *time = "29AB5F49";
     const char *nbits = "FFFF001D";
 
-    uint32_t h_correct_nonce;
-    unsigned h_correct_hash[8];
-
 	// prepare the block header (except for the nonce of each thread) for hashing
     BYTE *blockHeader = (BYTE *)malloc(80 * sizeof(BYTE));
     hexStringToByteArray(version, blockHeader);
@@ -102,31 +99,27 @@ int main(){
     uint32_t bits[1];
     hexstr_to_intarray(nbits, bits);
     setDifficulty(*bits, difficulty);
+
+	int numBlocks = 1;
+	int threads_per_block = 256;
 	
-    // launch_mine(512, 2083236393, blockHeader);
+	cudaEvent_t start, stop;
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
 
-    // cudaMemcpyFromSymbol(&h_correct_nonce, correct_nonce, sizeof(uint32_t));
-    // cudaMemcpyFromSymbol(h_correct_hash, correct_hash, sizeof(uint32_t) * 8);
+	// testing with 500 nonces smaller than the correct nonce. 
+	// Calculate the number of blocks needed
+    // int numBlocks = (MAX_NONCE - nonce + threads_per_block - 1) / threads_per_block;
+    mine_kernel<<<numBlocks, threads_per_block>>>(2083236393, blockHeader);
+	
+	cudaEventRecord(stop, 0);
+	cudaEventSynchronize(stop);
+
+	cudaEventDestroy(start);
+	cudaEventDestroy(stop);
     
-    // printf("%d\n", h_correct_nonce);
-    // print_bytes_reversed((unsigned char *)h_correct_hash, 32, 1);
-}
-
-
-
-
-
-
-
-
-
-
-/*********************** FUNCTION DEFINITIONS ***********************/
-__device__ void uint32_to_little_endian(uint32_t value, unsigned char *buffer) {
-    buffer[0] = value & 0xFF;         // Extracts the least significant byte
-    buffer[1] = (value >> 8) & 0xFF;
-    buffer[2] = (value >> 16) & 0xFF;
-    buffer[3] = (value >> 24) & 0xFF; // Extracts the most significant byte
+    printf("%d\n", correct_nonce);
+    print_bytes_reversed((unsigned char *)correct_hash, 32, 1);
 }
 
 __global__ void mine_kernel(uint32_t nonce_blockStart, BYTE *blockHeader) {
@@ -172,19 +165,28 @@ __global__ void mine_kernel(uint32_t nonce_blockStart, BYTE *blockHeader) {
     }
 }
 
-// Define the launch_mine function
-void launch_mine(int threads_per_block, uint32_t nonceStart, BYTE *blockHeader) {
 
-    // Calculate the number of blocks needed
-    // int numBlocks = (MAX_NONCE - nonce + threads_per_block - 1) / threads_per_block;
-    int numBlocks = 1;
-
-    // Launch the mine_kernel
-    mine_kernel<<<numBlocks, threads_per_block>>>(nonceStart, blockHeader);
-
-    // Wait for GPU to finish before accessing on host
-    cudaDeviceSynchronize();
+/*********************** FUNCTION DEFINITIONS ***********************/
+__device__ void uint32_to_little_endian(uint32_t value, unsigned char *buffer) {
+    buffer[0] = value & 0xFF;         // Extracts the least significant byte
+    buffer[1] = (value >> 8) & 0xFF;
+    buffer[2] = (value >> 16) & 0xFF;
+    buffer[3] = (value >> 24) & 0xFF; // Extracts the most significant byte
 }
+
+// // Define the launch_mine function
+// void launch_mine(int threads_per_block, uint32_t nonceStart, BYTE *blockHeader) {
+
+//     // Calculate the number of blocks needed
+//     // int numBlocks = (MAX_NONCE - nonce + threads_per_block - 1) / threads_per_block;
+//     int numBlocks = 1;
+
+//     // Launch the mine_kernel
+//     mine_kernel<<<numBlocks, threads_per_block>>>(nonceStart, blockHeader);
+
+//     // Wait for GPU to finish before accessing on host
+//     cudaDeviceSynchronize();
+// }
 
 __device__ void sha256_transform(SHA256_CTX *ctx, const BYTE data[])
 {

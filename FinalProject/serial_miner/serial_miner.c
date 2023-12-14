@@ -17,7 +17,7 @@ int main()
     // unsigned char result[32];
 
     // testing hashBlock funciton with nonce = 2083236893, the correct nonce
-    the following line verifies the genesis block in one hash
+    //the following line verifies the genesis block in one hash
     print_bytes_reversed((unsigned char *)result, 32, 1);
 
     // testing mineBlock function with nonce = 2083236793, 10 nounces before the correct nonce

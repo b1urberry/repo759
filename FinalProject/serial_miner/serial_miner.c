@@ -14,7 +14,7 @@ int main()
     char *time = "29AB5F49";
     char *bits = "FFFF001D";
 
-    // unsigned char result[32];
+    unsigned char result[32];
 
     // testing hashBlock funciton with nonce = 2083236893, the correct nonce
     //the following line verifies the genesis block in one hash

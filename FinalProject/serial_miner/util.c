@@ -175,6 +175,7 @@ uint32_t mineBlock(uint32_t noncestart, char *version, char *prev_block_hash, ch
         {
             if(hash[7-i] < difficulty[i])
             {
+                print_bytes_reversed((unsigned char *)hash, 32, 1);
                 solved = 1;
                 free(blockHeader);
                 return nonce;

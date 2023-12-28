@@ -49,8 +49,8 @@ __device__ void sha256_update(SHA256_CTX *ctx, const BYTE data[], size_t len);
 __device__ void sha256_final(SHA256_CTX *ctx, BYTE hash[]);
 
 // global variables to store the correct nonce and hash
-__managed__ uint32_t correct_nonce;
-__managed__ uint32_t correct_hash[8];
+// __managed__ uint32_t correct_nonce;
+// __managed__ uint32_t correct_hash[8];
 __managed__ uint32_t difficulty[8];
 
 // miner kernel call: each thread verifies one nonce
@@ -99,9 +99,28 @@ int main(){
     uint32_t bits[1];
     hexstr_to_intarray(nbits, bits);
     setDifficulty(*bits, difficulty);
+	printf("Difficulty: \n");
+	print_bytes((unsigned char *)difficulty, 32, 1);
 
 	int numBlocks = 1;
 	int threads_per_block = 256;
+
+	// initialize the correct nonce and hash on the host
+	uint32_t correct_nonce = 0;
+	uint32_t correct_hash[8];
+	for (int i = 0; i < 8; i++) {
+		correct_hash[i] = 0;
+	}
+
+	// device variables for the correct nonce and hash
+	uint32_t *d_correct_nonce;
+	uint32_t *d_correct_hash;
+	cudaMalloc(&d_correct_nonce, sizeof(uint32_t));
+	cudaMalloc(&d_correct_hash, 8 * sizeof(uint32_t));
+
+	// copy the correct nonce and hash to the device
+	cudaMemcpy(d_correct_nonce, &correct_nonce, sizeof(uint32_t), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_correct_hash, &correct_hash, 8 * sizeof(uint32_t), cudaMemcpyHostToDevice);
 	
 	cudaEvent_t start, stop;
 	cudaEventCreate(&start);
@@ -118,11 +137,15 @@ int main(){
 	cudaEventDestroy(start);
 	cudaEventDestroy(stop);
     
+	// copy from device to host
+	cudaMemcpy(&correct_nonce, d_correct_nonce, sizeof(uint32_t), cudaMemcpyDeviceToHost);
+	cudaMemcpy(&correct_hash, d_correct_hash, 8 * sizeof(uint32_t), cudaMemcpyDeviceToHost);
+
     printf("%d\n", correct_nonce);
     print_bytes_reversed((unsigned char *)correct_hash, 32, 1);
 }
 
-__global__ void mine_kernel(uint32_t nonce_blockStart, BYTE *blockHeader) {
+__global__ void mine_kernel(uint32_t nonce_blockStart, BYTE *blockHeader, uint32_t *correct_nonce, uint32_t *correct_hash) {
     int threadId = blockIdx.x * blockDim.x + threadIdx.x;
     uint32_t nonce = nonce_blockStart + threadId;
 
@@ -150,12 +173,11 @@ __global__ void mine_kernel(uint32_t nonce_blockStart, BYTE *blockHeader) {
     {
         if(hash[7-i] < difficulty[i])
         {
-            // atomicExch(&correct_nonce, nonce);
-			correct_nonce = nonce;
+            // set the correct nonce
+			*correct_nonce = nonce;
             // Copy the hash to correct_hash
             for (int i = 0; i < 8; i++) {
 				correct_hash[i] = hash[i];
-                // atomicExch(&correct_hash[i], hash[i]);
             }
             return;
         }

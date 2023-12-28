@@ -16,7 +16,11 @@ int main()
     
     // testing mineBlock function with nonce = 2083236793, 10 nounces before the correct nonce
     // the following line verifies the genesis block in 10 hashes
-    uint32_t nonce = mineBlock(2000000000, version, prev_block_hash, merkle_root, time, bits);
+    uint32_t nonce = mineBlock(2080000000, version, prev_block_hash, merkle_root, time, bits);
+    
+    // testing hashBlock function with nonce = 2083236793, the correct nonce
+    // the following line verifies the genesis block in 10 hashes
+
     printf("found nonce:");
     printf("%d\n", nonce);
 
